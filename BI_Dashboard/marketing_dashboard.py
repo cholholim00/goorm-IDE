@@ -24,6 +24,48 @@ def load_marketing_data():
     # Date 컬럼을 datetime으로 변환
     df['Date'] = pd.to_datetime(df['Date'])
     
+    # 채널 한글 매핑
+    channel_mapping = {
+        'Google Ads': '구글 광고',
+        'YouTube': '유튜브',
+        'Instagram': '인스타그램',
+        'Website': '웹사이트',
+        'Facebook': '페이스북',
+        'Twitter': '트위터',
+        'LinkedIn': '링크드인'
+    }
+    df['Channel_Used'] = df['Channel_Used'].map(channel_mapping).fillna(df['Channel_Used'])
+    
+    # 캠페인 유형 한글 매핑
+    campaign_type_mapping = {
+        'Email': '이메일',
+        'Influencer': '인플루언서',
+        'Display': '디스플레이',
+        'Search': '검색',
+        'Social Media': '소셜 미디어'
+    }
+    df['Campaign_Type'] = df['Campaign_Type'].map(campaign_type_mapping).fillna(df['Campaign_Type'])
+    
+    # 고객 세그먼트 한글 매핑
+    segment_mapping = {
+        'Health & Wellness': '건강 및 웰니스',
+        'Fashionistas': '패셔니스타',
+        'Outdoor Adventurers': '아웃도어 모험가',
+        'Foodies': '푸디',
+        'Tech Enthusiasts': '기술 애호가'
+    }
+    df['Customer_Segment'] = df['Customer_Segment'].map(segment_mapping).fillna(df['Customer_Segment'])
+    
+    # 회사명 한글 매핑
+    company_mapping = {
+        'Innovate Industries': '혁신 산업',
+        'NexGen Systems': '넥스젠 시스템',
+        'Alpha Innovations': '알파 이노베이션',
+        'DataTech Solutions': '데이터테크 솔루션',
+        'TechCorp': '테크코프'
+    }
+    df['Company'] = df['Company'].map(company_mapping).fillna(df['Company'])
+    
     return df
 
 # 계산 함수
@@ -56,8 +98,15 @@ with st.sidebar:
         "날짜 범위",
         value=(min_date, max_date),
         min_value=min_date,
-        max_value=max_date
+        max_value=max_date,
+        format="YYYY-MM-DD"
     )
+    
+    # 날짜 정보 표시
+    if isinstance(date_range, tuple) and len(date_range) == 2:
+        st.caption(f"선택된 기간: {date_range[0].strftime('%Y년 %m월 %d일')} ~ {date_range[1].strftime('%Y년 %m월 %d일')}")
+    elif date_range:
+        st.caption(f"선택된 날짜: {date_range.strftime('%Y년 %m월 %d일')}")
     
     # 필터 적용
     filtered_marketing_df = marketing_df.copy()
@@ -114,21 +163,54 @@ st.markdown("---")
 
 # 예산 효율성 Scatter 차트
 st.subheader("예산 효율성 분석")
+
+# 데이터 샘플링 (너무 많은 데이터가 있으면 시각화가 어려움)
+if len(filtered_marketing_df) > 1000:
+    sample_df = filtered_marketing_df.sample(n=1000, random_state=42)
+    st.caption(f"※ 데이터가 많아 표본 {len(sample_df):,}개를 무작위로 표시합니다. (전체: {len(filtered_marketing_df):,}개)")
+else:
+    sample_df = filtered_marketing_df
+
+# Conversion_Rate를 퍼센트로 변환하여 크기 조정
+sample_df = sample_df.copy()
+sample_df['Conversion_Rate_Percent'] = sample_df['Conversion_Rate'] * 100
+
 fig_scatter = px.scatter(
-    filtered_marketing_df,
+    sample_df,
     x='Acquisition_Cost',
     y='ROI',
     color='Channel_Used',
-    size='Conversion_Rate',
-    hover_data=['Company', 'Campaign_Type'],
+    size='Conversion_Rate_Percent',
+    hover_data=['Company', 'Campaign_Type', 'Conversion_Rate'],
     title="획득 비용 대 ROI (채널별)",
-    labels={'Acquisition_Cost': '획득 비용 ($)', 'ROI': 'ROI'},
-    color_discrete_sequence=px.colors.qualitative.Set3
+    labels={
+        'Acquisition_Cost': '획득 비용 ($)', 
+        'ROI': 'ROI', 
+        'Channel_Used': '채널',
+        'Conversion_Rate_Percent': '전환율 (%)'
+    },
+    color_discrete_sequence=px.colors.qualitative.Set3,
+    size_max=30
 )
 fig_scatter.update_layout(
     height=500,
     xaxis_title="획득 비용 ($)",
     yaxis_title="ROI",
-    title_font_size=16
+    title_font_size=16,
+    legend=dict(
+        title="채널",
+        orientation="v",
+        yanchor="top",
+        y=1,
+        xanchor="left",
+        x=1.02
+    ),
+    hovermode='closest'
+)
+fig_scatter.update_traces(
+    marker=dict(
+        line=dict(width=0.5, color='DarkSlateGrey'),
+        opacity=0.7
+    )
 )
 st.plotly_chart(fig_scatter, use_container_width=True)
