@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+<<<<<<< HEAD
   <component name="ProjectRootManager" version="2">
+=======
+  <component name="ProjectRootManager">
+>>>>>>> 7a4504147b100505da2ff58c1919cc2805fbf880
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

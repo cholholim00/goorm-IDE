@@ -1,6 +1,7 @@
 # 디폴트 무시된 파일
 /shelf/
 /workspace.xml
+<<<<<<< HEAD
 # 쿼리 파일을 포함한 무시된 디폴트 폴더
 /queries/
 # Datasource local storage ignored files
@@ -8,3 +9,12 @@
 /dataSources.local.xml
 # 에디터 기반 HTTP 클라이언트 요청
 /httpRequests/
+=======
+# 에디터 기반 HTTP 클라이언트 요청
+/httpRequests/
+# 환경에 따라 달라지는 Maven 홈 디렉터리
+/mavenHomeManager.xml
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+>>>>>>> 7a4504147b100505da2ff58c1919cc2805fbf880
