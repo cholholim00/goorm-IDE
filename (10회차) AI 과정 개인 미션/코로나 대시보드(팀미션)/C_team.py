@@ -7,7 +7,7 @@ base_path = os.path.dirname(os.path.abspath(__file__))
 file_path = os.path.join(base_path, 'data', 'daily_covid_data.csv')
 
 if not os.path.exists(file_path):
-    print("❌ 데이터 파일이 없습니다! 'project_reset_v4.py'를 먼저 실행해주세요.")
+    print("❌ 데이터 파일이 없습니다! 'project_reset.py'를 먼저 실행해주세요.")
     exit()
 
 df = pd.read_csv(file_path)
