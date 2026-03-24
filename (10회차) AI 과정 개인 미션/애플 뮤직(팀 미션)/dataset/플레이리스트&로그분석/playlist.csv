@@ -1,6 +1,0 @@
-playlist_id,user_id,playlist_name,track_ids
-PL001,US001,발라드,"TR001, TR002, TR003"
-PL002,US002,조용한 음악,"TR003, TR004, TR005, TR006"
-PL003,US003,공부할때듣는음악,"TR010, TR011"
-PL004,US004,산책할때 듣는 음악,TR001
-PL005,US005,드라이브 음악,"TR008, TR009, TR010"
