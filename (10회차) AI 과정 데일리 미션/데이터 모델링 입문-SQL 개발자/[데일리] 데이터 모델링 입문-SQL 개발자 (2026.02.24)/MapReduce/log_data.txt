@@ -1,0 +1,7 @@
+user1,songA,120
+user2,songB,200
+user3,,150
+user4,songA,-10
+user5,songA,180
+user1,songC,error
+user6,songB,210
