@@ -1,0 +1,31 @@
+## 뉴스 요약 파인튜닝(Fine-tuning) 구현 로드맵
+
+Hugging Face의 `transformers` 라이브러리를 활용하면 BART와 T5 모두 유사한 파이프라인으로 파인튜닝을 진행할 수 있습니다.
+
+### 🛠️ 공통 준비물
+
+- **라이브러리:** `transformers`, `datasets`, `accelerate`, `evaluate`, `rouge_score`
+- **데이터셋:** AI Hub 뉴스 데이터나 Hugging Face의 `daekeun-ml/naver-news-summarization-ko` 등 한국어 뉴스 요약 데이터셋
+
+### 🚀 파인튜닝 핵심 단계
+
+### Step 1: 모델 및 토크나이저 로드
+
+한국어 뉴스 요약의 경우, 다운스트림 태스크에 맞게 조정된 사전학습 모델을 선택하는 것이 좋습니다.
+
+- **BART:** `gogamza/kobart-base-v2` 또는 `SKT-AI/kobart-news`
+- **T5:** `paust/pko-t5-base`
+
+### Step 2: 데이터 전처리 (Data Preprocessing)
+
+- **BART:** 입력 뉴스 기사는 Encoder의 입력(`input_ids`)으로, 요약문은 Decoder의 목표 출력(`labels`)으로 토크나이징합니다.
+- **T5:** 입력 기사 맨 앞에 `"summarize: "`라는 문자열을 붙여서 토크나이징해야 합니다. (예: `"summarize: 오늘 날씨는..."`)
+
+### Step 3: Data Collator 설정
+
+Sequence-to-Sequence 태스크에서는 패딩 처리가 중요합니다. Hugging Face의 `DataCollatorForSeq2Seq`를 사용하면 입력과 출력 레이블의 패딩 및 디코더 시프트(`decoder_start_token_id`)를 알아서 안전하게 처리해 줍니다.
+
+### Step 4: Trainer 및 학습 인자(`Seq2SeqTrainingArguments`) 설정
+
+- `predict_with_generate=True` 옵션을 켜서 평가 시 모델이 실제로 문장을 생성하도록 설정합니다.
+- 평가 지표로는 요약 태스크의 표준인 ROUGE score (ROUGE-1, ROUGE-2, ROUGE-L)를 활용합니다.
