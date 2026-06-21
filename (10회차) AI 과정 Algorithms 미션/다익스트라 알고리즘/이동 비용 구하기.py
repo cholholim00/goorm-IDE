@@ -1,48 +1,36 @@
 import sys
-import heapq
+input = sys.stdin.readline
+from math import inf
+from heapq import heappop, heappush
 
-def solve_move_cost():
-    input = sys.stdin.readline
-    N = int(input())
-    
-    # N이 1인 경우 연결할 통로가 없으므로 비용은 0
-    if N == 1:
-        print(0)
-        return
+N, M = map(int, input().split())
+S = int(input()) - 1
 
-    # MST 방문 여부 체크
-    visited = [False] * (N + 1)
-    
-    # 우선순위 큐: (비용, 목적지 정점)
-    # 1번 정점부터 시작한다고 가정
-    pq = [(0, 1)]
-    
-    total_cost = 0
-    cnt = 0
-    
-    while pq:
-        cost, curr = heapq.heappop(pq)
-        
-        # 이미 MST에 포함된 정점이면 건너뜀
-        if visited[curr]:
-            continue
-            
-        # MST에 추가
-        visited[curr] = True
-        total_cost += cost
-        cnt += 1
-        
-        # 모든 정점을 연결했다면 종료
-        if cnt == N:
-            break
-            
-        # 현재 정점에서 갈 수 있는 다른 모든 정점과의 간선 비용을 계산하여 큐에 삽입
-        # 가중치는 curr * nxt
-        for nxt in range(1, N + 1):
-            if not visited[nxt] and curr != nxt:
-                heapq.heappush(pq, (curr * nxt, nxt))
-                
-    print(total_cost)
+G = [[] for _ in range(N)]
+for _ in range(M):
+	s, e, w = map(int, input().split())
+	G[s - 1].append((e - 1, w))
 
-if __name__ == '__main__':
-    solve_move_cost()
+# 가중치가 동일하지 않은 그래프에서의 최단 경로는 다익스트라로 풀어내면 된다.
+pq = []
+heappush(pq, (0, S)) # 시작점과 시작점까지의 비용을 pq에 담는다.
+dist = [inf] * N
+dist[S] = 0 # 시작점까지의 비용은 0이다.
+
+while pq: # pq가 빌 때까지 반복한다.
+	d, u = heappop(pq)
+	if dist[u] < d: # 저장된 u까지의 최소 비용이 d가 크다면, 이미 d보다 더 적은 비용으로 u에서 탐색했다는 의미이다.
+		continue
+	for v, w in G[u]:
+		if dist[v] > d + w: # u와 인접한 v까지의 비용보다 u까지의 비용 + 간선의 비용이 더 작다면 v까지의 비용이 갱신될 수 있다.
+			dist[v] = d + w
+			heappush(pq, (dist[v], v))
+
+res = 0
+for i in range(N):
+	if dist[i] < inf:
+		res += dist[i]
+	else:
+		res -= 1
+
+print(res)

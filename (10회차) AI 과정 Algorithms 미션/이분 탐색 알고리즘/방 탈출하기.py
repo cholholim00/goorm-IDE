@@ -1,22 +1,19 @@
 import sys
+input = sys.stdin.readline
+from bisect import bisect
 
-def solve():
-    input = sys.stdin.readline
-    
-    N = int(input())
-    # 수열 A를 set으로 입력받아 중복 제거 및 O(1) 탐색 보장
-    A_set = set(map(int, input().split()))
-    
-    M = int(input())
-    # 질문 배열 B 입력
-    B = list(map(int, input().split()))
-    
-    # 각 질문에 대해 존재하면 1, 없으면 0 출력
-    for num in B:
-        if num in A_set:
-            print(1)
-        else:
-            print(0)
+N = int(input())
+A = list(map(int, input().split()))
+M = int(input())
+B = [int(input()) for _ in range(M)]
 
-if __name__ == "__main__":
-    solve()
+# A를 정렬한다.
+A.sort()
+
+# Bi가 A에 포함되는지 이분 탐색으로 확인한다.
+for i in range(M):
+	j = bisect(A, B[i])
+	if j and A[j - 1] == B[i]:
+		print(1)
+	else:
+		print(0)

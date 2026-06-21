@@ -1,67 +1,48 @@
 import sys
+input = sys.stdin.readline
 from collections import deque
 
-def solve_image_processing():
-    input = sys.stdin.read
-    data = input().split()
-    
-    if not data:
-        return
+# (si, sj)에서 BFS를 시작해서 방문한 모든 칸의 개수를 출력하는 함수
+def bfs(si, sj):
+	visited[si][sj] = True # 시작 위치는 방문 처리
+	dq = deque()
+	dq.append((si, sj)) # 시작 위치를 큐에 담는다.
+	sz = 1 # 영역의 크기. 즉, 방문한 칸의 개수
 
-    N = int(data[0])
-    M = int(data[1])
-    
-    # 영상 픽셀 데이터 배열 생성
-    grid = []
-    idx = 2
-    for _ in range(N):
-        grid.append([int(x) for x in data[idx:idx+M]])
-        idx += M
-        
-    # 임곗값 T
-    T = int(data[idx])
+	while dq: # 큐가 비어있다면 종료한다.
+		i, j = dq.popleft() # 큐의 맨 앞에 있는 위치를 꺼낸다.
+		if 0 <= i - 1 and not visited[i - 1][j] and S[i - 1][j] == '#': # 위
+			visited[i - 1][j] = True
+			dq.append((i - 1, j))
+			sz += 1
+		if i + 1 < M and not visited[i + 1][j] and S[i + 1][j] == '#': # 아래
+			visited[i + 1][j] = True
+			dq.append((i + 1, j))
+			sz += 1
+		if 0 <= j - 1 and not visited[i][j - 1] and S[i][j - 1] == '#': # 왼쪽
+			visited[i][j - 1] = True
+			dq.append((i, j - 1))
+			sz += 1
+		if j + 1 < N and not visited[i][j + 1] and S[i][j + 1] == '#': # 오른쪽
+			visited[i][j + 1] = True
+			dq.append((i, j + 1))
+			sz += 1
 
-    visited = [[False] * M for _ in range(N)]
-    
-    # 상하좌우 방향 벡터
-    dr = [-1, 1, 0, 0]
-    dc = [0, 0, -1, 1]
-    
-    component_count = 0
-    max_component_size = 0
+	return sz
 
-    # 모든 격자를 순회하며 탐색 시작
-    for r in range(N):
-        for c in range(M):
-            # 픽셀 값이 T 이상이고 아직 방문하지 않은 칸을 만나면 새로운 객체(덩어리) 시작
-            if grid[r][c] >= T and not visited[r][c]:
-                component_count += 1
-                
-                # BFS를 통한 덩어리 크기 측정
-                queue = deque([(r, c)])
-                visited[r][c] = True
-                current_size = 0
-                
-                while queue:
-                    curr_r, curr_c = queue.popleft()
-                    current_size += 1
-                    
-                    for i in range(4):
-                        nr, nc = curr_r + dr[i], curr_c + dc[i]
-                        
-                        if 0 <= nr < N and 0 <= nc < M:
-                            # 경계 내에 있고, 값이 T 이상이며, 방문하지 않은 경우
-                            if grid[nr][nc] >= T and not visited[nr][nc]:
-                                visited[nr][nc] = True
-                                queue.append((nr, nc))
-                
-                # 최대 객체 크기 갱신
-                if current_size > max_component_size:
-                    max_component_size = current_size
+N, M = map(int, input().split())
+S = [input().strip() for _ in range(M)]
 
-    # 결과 출력 (객체의 개수와 가장 큰 객체의 크기)
-    print(component_count)
-    print(max_component_size)
+# 플러드 필 문제다.
+# BFS로 해결할 수 있다.
+res = [] # 물체의 크기들을 담아놓는다.
+visited = [[False] * N for _ in range(M)]
+for i in range(M):
+	for j in range(N):
+		if visited[i][j] or S[i][j] == '.': # 방문하지 않은 칸이면서 마스킹 처리한 칸을 찾아야 한다.
+			continue
+		sz = bfs(i, j)
+		res.append(sz)
 
-if __name__ == '__main__':
-    solve_image_processing()
+print(len(res)) # 물체의 개수
+print(max(res)) # 가장 큰 물체의 크기를 찾아야 한다.

@@ -1,56 +1,37 @@
 import sys
+from collections import defaultdict
+from collections import deque
+input = sys.stdin.readline
 
-def solve_smallest_node():
-    input = sys.stdin.read
-    data = input().split()
-    
-    if not data:
-        return
+# 노드의 개수 N, 간선의 개수 M, 시작 노드 K
+N, M, K = map(int, input().split())
+graph = defaultdict(list)
 
-    N = int(data[0])
-    M = int(data[1])
-    K = int(data[2])  # 시작 노드 번호
-    
-    # 인접 리스트 생성
-    graph = [[] for _ in range(N + 1)]
-    idx = 3
-    for _ in range(M):
-        u = int(data[idx])
-        v = int(data[idx+1])
-        graph[u].append(v)
-        graph[v].append(u)
-        idx += 2
-        
-    # "가장 작은 노드"를 빠르게 찾기 위해 각 인접 리스트를 오름차순으로 정렬
-    for i in range(1, N + 1):
-        graph[i].sort()
+# 그래프 선언
+for _ in range(M):
+    s, e = map(int, input().split())
+    graph[s].append(e)
+    graph[e].append(s)
 
-    visited = [False] * (N + 1)
-    
-    curr = K
-    visited[curr] = True
-    visited_count = 1  # 시작 노드 포함
+q = deque()
+q.append(K)
+# 방문 지점 관리
+visited = [False] * (N+1)
+visited_cnt  = 1
 
-    while True:
-        next_node = -1
-        
-        # 이미 정렬되어 있으므로, 방문하지 않은 첫 번째 인접 노드가 가장 번호가 작음
-        for neighbor in graph[curr]:
-            if not visited[neighbor]:
-                next_node = neighbor
-                break
-        
-        # 더 이상 갈 수 있는 미방문 인접 노드가 없다면 탐색 종료
-        if next_node == -1:
-            break
-            
-        # 다음 노드로 이동 및 상태 갱신
-        visited[next_node] = True
-        visited_count += 1
-        curr = next_node
-
-    # 결과 출력 (마지막으로 도달한 노드 번호, 방문한 총 노드 수)
-    print(curr, visited_count)
-
-if __name__ == '__main__':
-    solve_smallest_node()
+while q:
+    # 현재 노드 추출
+    current_Node =q.popleft()
+    min_node = N+1
+    visited[current_Node] = True
+    for i in graph[current_Node]:
+        #방문 한 적 없는 노드 중 노드의 번호가 가장 작은 노드만으로 이동함.
+        if not visited[i]:
+            min_node = min(min_node, i)
+    # 더 이상 이동할 노드가 없다면, 이동거리와 마지막 노드를 출력
+    if min_node != N+1:
+        visited_cnt += 1
+        q.append(min_node)
+    else:
+        print(visited_cnt, current_Node)
+        break

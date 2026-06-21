@@ -1,21 +1,40 @@
 import sys
-N = int(sys.stdin.readline())
-MOD = 1_000_000
-dp = [[[0]*3 for _ in range(2)] for _ in range(3)]
-dp[0][0][0] = 1
-dp[1][1][0] = 1
-dp[2][0][1] = 1
-for _ in range(N-1):
-    ndp = [[[0]*3 for _ in range(2)] for _ in range(3)]
-    for last in range(3):
-        for b in range(2):
-            for cs in range(3):
-                val = dp[last][b][cs]
-                if not val: continue
-                ndp[0][b][0] = (ndp[0][b][0] + val) % MOD
-                if b == 0:
-                    ndp[1][1][0] = (ndp[1][1][0] + val) % MOD
-                if cs < 2:
-                    ndp[2][b][cs+1] = (ndp[2][b][cs+1] + val) % MOD
-    dp = ndp
-print(sum(dp[l][b][c] for l in range(3) for b in range(2) for c in range(3)) % MOD)
+input = sys.stdin.readline
+MOD = 1000000
+
+N = int(input())
+
+dp = [[0] * 6 for _ in range(N)]
+dp[0][0] = 1 # A
+dp[0][3] = 1 # B
+dp[0][1] = 1 # C
+
+for i in range(1, N):
+
+	# 1번 상태가 되기 위해선
+	# 1, 2, 3번 상태에서 넘어와야 한다.
+	dp[i][0] = (dp[i - 1][0] + dp[i - 1][1] + dp[i - 1][2]) % MOD
+
+	# 2번 상태가 되기 위해선
+	# 1번 상태에서 넘어와야 한다.
+	dp[i][1] = dp[i - 1][0]
+
+	# 3번 상태가 되기 위해선
+	# 2번 상태에서 넘어와야 한다.
+	dp[i][2] = dp[i - 1][1]
+
+	# 4번 상태가 되기 위해선
+	# 1, 2, 3, 4, 5, 6번 상태에서 넘어와야 한다.
+	dp[i][3] = (dp[i - 1][0] + dp[i - 1][1] + dp[i - 1][2] + dp[i - 1][3] + dp[i - 1][4] + dp[i - 1][5]) % MOD
+
+	# 5번 상태가 되기 위해선
+	# 4번 상태에서 넘어와야 한다.
+	dp[i][4] = dp[i - 1][3]
+
+	# 6번 상태가 되기 위해선
+	# 5번 상태에서 넘어와야 한다.
+	dp[i][5] = dp[i - 1][4]
+
+# N번째 과목의 상태에 따른 경우의 수를 모두 합치면
+# 1~N번째 과목의 가능한 학점의 경우의 수가 된다.
+print(sum(dp[N - 1]) % MOD)

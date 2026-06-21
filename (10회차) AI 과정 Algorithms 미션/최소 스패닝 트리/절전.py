@@ -1,73 +1,43 @@
 import sys
-
-# PyTorch나 다른 무거운 라이브러리와 충돌을 방지하기 위해 
-# 재귀 깊이를 안전하게 설정합니다.
-sys.setrecursionlimit(300000)
 input = sys.stdin.readline
+from heapq import heappop, heappush
 
+''' 1번 구역을 포함해서 K개의 구역이 연결되게끔 최소한의 비용을 들여서 간선을 추가해야 한다.
+이는 최소 스패닝 트리를 구하는 문제다.
+1번 구역부터 최소 스패닝 트리를 확장시켜야 하므로 프림이 적합하다. '''
 
-def find(x, parent):
-    if parent[x] < 0:
-        return x
-    parent[x] = find(parent[x], parent)
-    return parent[x]
+N, M, K = map(int, input().split())
+G = [[] for _ in range(N)]
+tot = 0 # 모든 복도의 소비 전력의 합
+for _ in range(M):
+	a, b, c = map(int, input().split())
+	a -= 1
+	b -= 1
+	G[a].append((b, c))
+	G[b].append((a, c))
+	tot += c
 
+# 우선순위 큐를 이용해 현재 연결된 정점으로부터 나아가는 간선들 중 가중치가 가장 낮은 간선을 뽑아야 한다.
+pq = [(0, 0)] # 1번 구역부터 시작해야 한다.
+ct = 0 # 현재 최소 스패닝 트리의 크기
+res = 0 # 최소 스패닝 트리를 이루는 간선들의 가중치의 합
+visited = [False] * N
 
-def union(x, y, parent):
-    root_x = find(x, parent)
-    root_y = find(y, parent)
+while ct < K: # 크기가 K가 될 때까지 반복해야 한다.
+	d, a = heappop(pq)
 
-    if root_x != root_y:
-        # parent[root]에는 해당 집합의 크기(음수 형태)를 저장합니다.
-        parent[root_x] += parent[root_y]
-        parent[root_y] = root_x
-        return True
-    return False
+	# 방문하지 않은 정점으로 나아가는 간선이 뽑혔다면 추가해준다.
+	if visited[a]:
+		continue
+	visited[a] = True
+	ct += 1
+	res += d
 
+	# 그 정점에서 다시 나아가는 간선을 우선순위 큐에 넣는다.
+	for b, c in G[a]:
+		if visited[b]:
+			continue
+		heappush(pq, (c, b))
 
-def solve():
-    N, M, K = map(int, input().split())
-
-    edges = []
-    total_power = 0
-
-    for _ in range(M):
-        u, v, w = map(int, input().split())
-        edges.append((w, u, v))
-        total_power += w
-
-    # 1. 절약 전력이 작은 복도(간선)부터 오름차순 정렬
-    edges.sort()
-
-    # parent 배열 초기화 (-1은 크기가 1인 루트 노드를 의미)
-    parent = [-1] * (N + 1)
-
-    # 처음부터 K가 1이라면 이미 1번 구역 혼자서 만족하므로 
-    # 아무 복도도 켤 필요 없이 모든 복도를 다 끌 수 있습니다.
-    if K <= 1:
-        print(total_power)
-        return
-
-    used_power = 0
-
-    # 2. 크루스칼 알고리즘 진행
-    for w, u, v in edges:
-        if union(u, v, parent):
-            # 1번 구역이 포함된 집합의 루트를 찾습니다.
-            root_1 = find(1, parent)
-            # parent[root_1]의 절대값이 곧 1번 컴포넌트의 구역(노드) 수입니다.
-            current_component_size = -parent[root_1]
-
-            # 최소 복도 전력 누적
-            used_power += w
-
-            # 1번 구역과 연결된 구역 수가 K 이상이 되는 순간 종료
-            if current_component_size >= K:
-                break
-
-    # 3. 전체 전력 - 불을 켜두는데 사용한 최소 전력 = 절약할 수 있는 최대 전력
-    print(total_power - used_power)
-
-
-if __name__ == "__main__":
-    solve()
+# 최소한으로 드는 소비 전력을 총 소비 전력에서 빼주면 된다.
+print(tot - res)
